@@ -1,0 +1,6 @@
+@virtusstructura_backend_HostAddress = http://localhost:5119
+
+GET {{virtusstructura_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
