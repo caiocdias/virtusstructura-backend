@@ -2,17 +2,17 @@
 {
     public class TrainingPlan
     {
-        public int Id { get; set; } // Identificador único (PK)
+        public int Id { get; set; }
 
         // Informações do plano
-        public string Name { get; set; } // Nome do plano (Ex.: "Treino de 12 semanas")
-        public string Goal { get; set; } // Objetivo principal (Ex.: "Hipertrofia")
+        public string Name { get; set; }
+        public string Goal { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
         // Relacionamento com usuário
-        public int UserId { get; set; } // Chave estrangeira para User
-        public User User { get; set; } // Referência ao usuário
+        public int UserId { get; set; }
+        public User User { get; set; }
 
         // Relacionamento com macrociclos
         public ICollection<Macrocycle> Macrocycles { get; set; }
