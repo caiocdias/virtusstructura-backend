@@ -24,6 +24,12 @@ namespace virtusstructura_backend.Models
 
         public ICollection<Macrocycle> Macrocycles { get; set; }
 
+        [Required]
+        public int UserId { get; set; }
+
+        [ForeignKey("UserId")]
+        public User User { get; set; }
+
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime CreatedAt { get; set; }
 

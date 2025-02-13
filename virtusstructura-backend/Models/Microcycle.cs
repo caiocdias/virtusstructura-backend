@@ -20,6 +20,12 @@ namespace virtusstructura_backend.Models
 
         public ICollection<Workout> Workouts { get; set; }
 
+        [Required]
+        public int MesocycleId { get; set; }
+
+        [ForeignKey("MesocycleId")]
+        public Mesocycle Mesocycle { get; set; }
+
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime CreatedAt { get; set; }
 
