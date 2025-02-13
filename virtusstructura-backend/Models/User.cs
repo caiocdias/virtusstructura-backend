@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -6,64 +8,87 @@ namespace virtusstructura_backend.Models
 {
     public class User
     {
+        private const int SaltSize = 16; 
+        private const int KeySize = 32;
+        private const int Iterations = 100_000;
+
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        // Informações básicas do usuário
-        public string Name { get; set; }
-        public string Email { get; set; }
+        [Required]
+        [StringLength(100)]
+        public string Name { get; set; } = string.Empty;
+        
+        [Required]
+        [StringLength(100)]
+        public string Email { get; set; } = string.Empty;
 
-        // Propriedades privadas para proteger os dados sensíveis
-        private string PasswordHash { get; set; }
-        private string PasswordSalt { get; set; }
+        [Required]
+        private byte[] PasswordHash { get; set; } = new byte[0];
 
-        // Dados físicos do usuário
+        [Required]
         public int Age { get; set; }
+        
+        [Required]
         public double Weight { get; set; }
+
+        [Required]
         public double Height { get; set; }
 
-        // Nível de experiência no treinamento
+        [Required]
+        [StringLength (100)]
         public string ExperienceLevel { get; set; }
 
-        // Relacionamento com planos de treino
         public ICollection<TrainingPlan> TrainingPlans { get; set; }
 
-        // Método para definir uma senha e gerar o hash
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
+
+        public void SetUpdatedAt()
+        {
+            UpdatedAt = DateTime.Now;
+        }
+
         public void SetPassword(string password)
         {
-            // Gera um salt único
-            PasswordSalt = GenerateSalt();
-
-            // Gera o hash da senha com o salt
-            PasswordHash = GenerateHash(password, PasswordSalt);
-        }
-
-        // Método para validar a senha fornecida
-        public bool ValidatePassword(string password)
-        {
-            // Compara o hash da senha fornecida com o hash armazenado
-            var hashedInput = GenerateHash(password, PasswordSalt);
-            return hashedInput == PasswordHash;
-        }
-
-        // Método para gerar um salt único
-        private string GenerateSalt()
-        {
-            var saltBytes = new byte[16];
             using (var rng = RandomNumberGenerator.Create())
             {
-                rng.GetBytes(saltBytes);
+                byte[] salt = new byte[SaltSize];
+                rng.GetBytes(salt);
+
+                using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, Iterations, HashAlgorithmName.SHA512))
+                {
+                    byte[] key = pbkdf2.GetBytes(KeySize);
+
+                    PasswordHash = new byte[SaltSize + KeySize];
+                    Array.Copy(salt, 0, PasswordHash, 0, SaltSize);
+                    Array.Copy(key, 0, PasswordHash, SaltSize, KeySize);
+                }
             }
-            return Convert.ToBase64String(saltBytes);
+
         }
 
-        // Método para gerar o hash da senha
-        private string GenerateHash(string password, string salt)
+        public bool ValidatePassword(string password)
         {
-            using (var sha256 = SHA256.Create())
+            if (PasswordHash == null || PasswordHash.Length != SaltSize + KeySize)
+                return false;
+
+            byte[] salt = new byte[SaltSize];
+            Array.Copy(PasswordHash, 0, salt, 0, SaltSize);
+
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, Iterations, HashAlgorithmName.SHA512))
             {
-                var saltedPassword = password + salt;
-                var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(saltedPassword));
-                return Convert.ToBase64String(hashBytes);
+                byte[] computedKey = pbkdf2.GetBytes(KeySize);
+
+                for (int i = 0; i < KeySize; i++)
+                {
+                    if (computedKey[i] != PasswordHash[SaltSize + i])
+                        return false;
+                }
+                return true;
             }
         }
     }
