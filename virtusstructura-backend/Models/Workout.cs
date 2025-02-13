@@ -16,10 +16,13 @@ namespace virtusstructura_backend.Models
         [Required]
         public DateTime Date { get; set; }
 
+        public ICollection<Exercise> Exercises { get; set; }
+
         [Required]
         public int MicrocycleId { get; set; }
-        
-        public ICollection<Exercise> Exercises { get; set; }
+
+        [ForeignKey("MicrocycleId")]
+        public Microcycle Microcycle { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime CreatedAt { get; set; }

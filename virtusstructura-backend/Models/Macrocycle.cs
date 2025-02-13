@@ -20,6 +20,12 @@ namespace virtusstructura_backend.Models
 
         public ICollection<Mesocycle> Mesocycles { get; set; }
 
+        [Required]
+        public int TrainingPlanId { get; set; }
+
+        [ForeignKey("TrainingPlanId")]
+        public TrainingPlan TrainingPlan { get; set; }
+
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime CreatedAt { get; set; }
 

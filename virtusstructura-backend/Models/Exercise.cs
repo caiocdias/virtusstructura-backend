@@ -22,6 +22,12 @@ namespace virtusstructura_backend.Models
         [Required]
         public double Load { get; set; }
 
+        [Required]
+        public int WorkoutId { get; set; }
+
+        [ForeignKey("WorkoutId")]
+        public Workout Workout { get; set; }
+
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime CreatedAt { get; set; }
 
